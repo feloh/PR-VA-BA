@@ -2,14 +2,12 @@ import pandas as pd
 from pyspin.spin import make_spin, Default
 from tqdm import tqdm
 
-# Timestamp Limits in Seconds
-timeStamp_limits = dict(hr=120, emg=60, PitchZones=30)
-
 
 # Import Function Excel --> Data
 @make_spin(Default, "Reading Excel Sheet...")
-def import_data():
-    data_frame = pd.read_excel('data/DataSet_270722.xlsx', sheet_name='Data')
+def import_data(path, name):
+    print('Path: ', path)
+    data_frame = pd.read_excel(path, sheet_name=name)
     return data_frame
 
 
@@ -18,28 +16,19 @@ def take_first(elem):
     return elem[0]
 
 
-# Linear Gradient Function
-def linear_gradient(m, x, b, r):
-    y = m * x + b
-    if r:
-        return round(y)
-    else:
-        return y
-
-
 # Smooth Function
-def smooth_data(dataframe, column, operation, r):
+def smooth_data(dataframe, column, operation, r, timestamp_limit):
     filtered = dataframe.index[dataframe[column] == -99].tolist()
     # A Flag contains [Index, Value]
     flags = []
     # Set Flags
     for i in tqdm(filtered):
-        if i != filtered[-1]:
-            if dataframe.loc[i - 1, column] != -99 and dataframe.loc[i, column] == -99 and dataframe.loc[i + 1, column]\
+        if i != (len(dataframe.index) - 1):
+            if i != 0 and dataframe.loc[i - 1, column] != -99 and dataframe.loc[i, column] == -99 and dataframe.loc[i + 1, column]\
                     != -99:
                 flags.append(tuple([i - 1, dataframe.loc[i - 1, column]]))
                 flags.append(tuple([i + 1, dataframe.loc[i + 1, column]]))
-            elif dataframe.loc[i - 1, column] != -99 and dataframe.loc[i, column] == -99:
+            elif i != 0 and dataframe.loc[i - 1, column] != -99 and dataframe.loc[i, column] == -99:
                 flags.append(tuple([i - 1, dataframe.loc[i - 1, column]]))
             elif dataframe.loc[i + 1, column] != -99 and dataframe.loc[i, column] == -99:
                 flags.append(tuple([i + 1, dataframe.loc[i + 1, column]]))
@@ -52,43 +41,50 @@ def smooth_data(dataframe, column, operation, r):
     print(len(paired_flags), ' paired Flags')
 
     # Smooth out gaps in dependency of the Data and the Data Type
-    for pair in paired_flags:
+    print('Correcting the values in column ', column)
+    for pair in tqdm(paired_flags):
         # Steigung
         val_dif = pair[1][1] - pair[0][1]
         # Datenlücke
         time_dif = pair[1][0] - pair[0][0]
-        print(time_dif)
-        if time_dif <= timeStamp_limits[column]:
+
+        if time_dif <= timestamp_limit:
             if operation == 'splitGap':
                 split_one = time_dif//2
                 split_two = time_dif - split_one
                 for i in range(split_one):
-                    dataframe.loc[pair[0][0] + i, column] = pair[0][1]
+                    dataframe.at[pair[0][0] + i + 1, column] = pair[0][1]
                 for i in reversed(range(split_two)):
-                    dataframe.loc[pair[1][0] - i, column] = pair[1][1]
+                    dataframe.at[pair[1][0] - i - 1, column] = pair[1][1]
             elif operation == 'gradient':
-                print(time_dif)
                 m = val_dif / time_dif
-                b = (pair[1][0]*pair[0][1] - pair[0][0]*pair[1][1]) / (pair[1][0] - pair[0][0])
                 for i in range(time_dif):
-                    dataframe.loc[pair[0][0] + i, column] = linear_gradient(m, i, b, r)
+                    if r:
+                        dataframe.at[pair[0][0] + i + 1, column] = round(pair[0][1] + m * (i + 1))
+                    else:
+                        dataframe.at[pair[0][0] + i + 1, column] = pair[0][1] + m * (i + 1)
 
-    print(df.loc[df['column'] == -99])
 
-
-# Smooth: Wenn <= Limit: lineare Steigung von Wert 1 zu Wert 2 bilden und über die Steps verteilen, bei Bedarf runden
-# Ansonsten zu große Lücken: Person aus Datensatz aussortieren
-
+data_path = 'data/DataSet_270722.xlsx'
+data_sheet_name = 'Data'
+Data_to_Smooth = [
+    dict(name='HR', operation='gradient', timeStampLimit=300, r=True),
+    dict(name='EMGDelta', operation='gradient', timeStampLimit=300, r=False),
+    dict(name='PitchZones', operation='splitGap', timeStampLimit=300, r=True),
+    dict(name='ObjectsOnScreen', operation='splitGap', timeStampLimit=300, r=True)
+]
+export_path = 'data/Output.xlsx'
 
 # -- Import the Dataset from Excel --
-df = import_data()
+df = import_data(data_path, data_sheet_name)
 print('The Data has been successfully imported.')
 print(df.info())
 
 # -- Clean the Dataset --
 # Remove the BallSpeed Column
-df.drop('BallSpeed', axis=1)
+df = df.drop(columns='BallSpeed')
 print('-- Dropped BallSpeed --')
+
 # Remove not combined Columns
 not_combined_columns = [
     'BallPosessionAway',
@@ -121,21 +117,27 @@ not_combined_columns = [
     'Zone5',
     'Zone6',
 ]
-for ncc in not_combined_columns:
-    df.drop(ncc, axis=1)
+df = df.drop(columns=not_combined_columns)
 print('-- Dropped not combined Columns --')
 
-# Group by Participants
-participants = df.groupby('ParticipantNumber')
-print('-- Grouped Data by Participant-Number --')
+# Smooth Missing Data
+for data in Data_to_Smooth:
+    smooth_data(dataframe=df, column=data['name'], operation=data['operation'], r=data['r'],
+                timestamp_limit=data['timeStampLimit'])
 
-# Smooth Objects on Screen
-# Smoothing the Pitch Zones values by splitting the missing data gaps into two parts and filling in the first and next
-# value
-smooth_data(dataframe=df, column='PitchZones', operation='splitGap', r=True)
+# Drop Participants with missing Data
+participant_id = []
+print('Searching for missing Data...')
+for data in tqdm(Data_to_Smooth):
+    for row in df.index[df[data['name']] == -99]:
+        print(data['name'])
+        participant_id.append(df.at[row, 'ParticipantNumber'])
+set_pi = set(participant_id)
+unique_participant_id = list(set_pi)
+for upi in unique_participant_id:
+    print('Dropping Participant ', upi, 'for lack of Data.')
+    df = df.drop(df.index[df['ParticipantNumber'] == upi])
 
-# TODO Smooth the Pitch Zone Data
-## Pitchzonesplate glätten: Grenzwert: 20s
-# TODO Smooth the Heart Rate Data
-# TODO Smooth the EMG Data
-# -- TODO Export and Save the Dataframe --
+# -- Export and Save the Dataframe --
+print('Export the Data to', export_path)
+df.to_excel(export_path)
