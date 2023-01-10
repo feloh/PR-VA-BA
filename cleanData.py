@@ -30,7 +30,7 @@ def smooth_data(dataframe, column, operation, r, timestamp_limit):
         if i != (len(dataframe.index) - 1):
             if i != 0 and dataframe.loc[i - 1, column] != -99 and dataframe.loc[i, column] == -99 and dataframe.loc[i + 1, column]\
                     != -99:
-                flags.append(tuple([i - 1, dataframe.loc[i - 1, column]]))
+                flags.append(tuple([i - 1, dataframe.loc[i - 1,  column]]))
                 flags.append(tuple([i + 1, dataframe.loc[i + 1, column]]))
             elif i != 0 and dataframe.loc[i - 1, column] != -99 and dataframe.loc[i, column] == -99:
                 flags.append(tuple([i - 1, dataframe.loc[i - 1, column]]))
@@ -147,5 +147,5 @@ for data in tqdm(Data_to_Smooth):
 
 # -- Export and Save the Dataframe --
 print('Export the Data to', export_path)
-df.to_excel(export_path)
-df.to_csv(export_path_csv)
+df.to_excel(export_path, index=False)
+df.to_csv(export_path_csv, header=False, index=False)
