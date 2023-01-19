@@ -91,6 +91,7 @@ print(hist.history.params)
 print(hist.history.history.keys())
 
 # summarize history for accuracy
+acc_fig = plt.figure()
 plt.plot(hist.history.history['accuracy'])
 plt.plot(hist.history.history['val_accuracy'])
 plt.title('model accuracy')
@@ -99,9 +100,10 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
 accuracy_path = "{}/accuracy.png".format(path)
-plt.savefig(accuracy_path)
+acc_fig.savefig(accuracy_path,  dpi=acc_fig.dpi)
 
 # summarize history for loss
+lss_fig = plt.figure()
 plt.plot(hist.history.history['loss'])
 plt.plot(hist.history.history['val_loss'])
 plt.title('model loss')
@@ -110,9 +112,8 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
 loss_path = "{}/loss.png".format(path)
-plt.savefig(loss_path)
+lss_fig.savefig(loss_path, dpi=lss_fig.dpi)
 
-# TODO Fix saving Plots
 # TODO ReadMe
 # TODO Split Functions among the Scripts (only as much as possible)
 # TODO Emotionen in späteren Layern erst hinzufügen
