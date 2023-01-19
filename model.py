@@ -12,7 +12,7 @@ def create_model():
     m = keras.Sequential()
     m.add(keras.layers.Dense(39, input_shape=(39,), activation='relu'))
     m.add(keras.layers.Dense(20, activation='relu'))
-    m.add(keras.layers.Dense(10, activation='relu'))
+    # m.add(keras.layers.Dense(10, activation='relu'))
     m.add(keras.layers.Dense(1, activation='softmax'))
     # Compile model
     m.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])

@@ -1,38 +1,7 @@
-import numpy as np
 import datetime
-from tensorflow import keras
-from pyspin.spin import make_spin, Default
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from imblearn.over_sampling import SMOTE
-from imblearn.under_sampling import RandomUnderSampler
-from imblearn.pipeline import Pipeline
-import numpy as np
 import model
-
-
-# Loading Function, Spliting the Data into Test and Train Data, Using SMOTE and RandomUndersampler to balance the Data
-@make_spin(Default, "Loading the Dataset...")
-def load_data(path, s):
-    print('Path: ', path)
-    ds = np.loadtxt('data/Output.csv', delimiter=',')
-    seed = s
-    np.random.seed(seed)
-    input = ds[:, 0:39]
-    output = ds[:, 39]
-    x_train, x_test, y_train, y_test = train_test_split(input, output, test_size=0.2, random_state=seed)
-
-    # define pipeline
-    over = SMOTE(sampling_strategy=0.1)
-    under = RandomUnderSampler(sampling_strategy=0.5)
-    steps = [('o', over), ('u', under)]
-    pipeline = Pipeline(steps=steps)
-
-    # transform the dataset
-    x_train, y_train = pipeline.fit_resample(x_train, y_train)
-
-    return x_train, x_test, y_train, y_test
-
+import process_data
 
 EPOCHS = 10
 BATCH_SIZE = 1
@@ -43,7 +12,7 @@ OUTPUT_PATH = 'models'
 DATE = datetime.datetime.now().strftime('%y%m%d%H%M%S')
 
 # -- Loading the Data --
-x_train, x_test, y_train, y_test = load_data(INPUT_PATH, SEED)
+x_train, x_test, y_train, y_test = process_data.load_data(INPUT_PATH, SEED)
 
 # -- Defining and compiling the keras Model --
 MODEL = model.create_model()
