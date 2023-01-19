@@ -1,5 +1,4 @@
 import numpy as np
-import os
 import datetime
 from tensorflow import keras
 from pyspin.spin import make_spin, Default
@@ -8,16 +7,17 @@ from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.pipeline import Pipeline
-import numpy
+import numpy as np
+import model
 
 
 # Loading Function, Spliting the Data into Test and Train Data, Using SMOTE and RandomUndersampler to balance the Data
 @make_spin(Default, "Loading the Dataset...")
-def load_data(path):
+def load_data(path, s):
     print('Path: ', path)
     ds = np.loadtxt('data/Output.csv', delimiter=',')
-    seed = 7
-    numpy.random.seed(seed)
+    seed = s
+    np.random.seed(seed)
     input = ds[:, 0:39]
     output = ds[:, 39]
     x_train, x_test, y_train, y_test = train_test_split(input, output, test_size=0.2, random_state=seed)
@@ -34,41 +34,23 @@ def load_data(path):
     return x_train, x_test, y_train, y_test
 
 
-@make_spin(Default, "Defining the Model...")
-def define_model():
-    m = keras.Sequential()
-    m.add(keras.layers.Dense(39, input_shape=(39,), activation='relu'))
-    m.add(keras.layers.Dense(20, activation='relu'))
-    m.add(keras.layers.Dense(10, activation='relu'))
-    m.add(keras.layers.Dense(1, activation='softmax'))
-    return m
-
-
-def fit_model(m, X, y, e, bs, v, xv, yv):
-    m.fit(X, y, epochs=e, batch_size=bs, verbose=v, validation_data=(xv, yv))
-    return m
-
-
 EPOCHS = 10
 BATCH_SIZE = 1
+SEED = 7
 VERBOSE = 2
 INPUT_PATH = 'data/Output.csv'
 OUTPUT_PATH = 'models'
 DATE = datetime.datetime.now().strftime('%y%m%d%H%M%S')
 
 # -- Loading the Data --
-x_train, x_test, y_train, y_test = load_data(INPUT_PATH)
+x_train, x_test, y_train, y_test = load_data(INPUT_PATH, SEED)
 
-# -- Defining the keras Model --
-model = define_model()
-
-# -- Compiling the keras Model --
-print('Compiling the Model')
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+# -- Defining and compiling the keras Model --
+MODEL = model.create_model()
 
 # # --Fitting the Model on the Dataset and evaluate--
 print('Fitting the Model')
-hist = fit_model(model, x_train, y_train, EPOCHS, BATCH_SIZE, VERBOSE, x_test, y_test)
+hist = model.fit_model(MODEL, x_train, y_train, EPOCHS, BATCH_SIZE, VERBOSE, x_test, y_test)
 
 # -- save Model to Tensorflow SavedModel-Format --
 path = OUTPUT_PATH + '/' + DATE
@@ -76,8 +58,12 @@ print(path)
 model_path = "{}/model".format(path)
 model.save(model_path)
 
+# -- Plot Model-Structure --
+
+model.plot_model(MODEL, path)
+
 # -- serialize model to JSON --
-model_json = model.to_json()
+model_json = MODEL.to_json()
 model_json_path = "{}/{}_{}_model.json".format(path, EPOCHS, BATCH_SIZE)
 with open(model_json_path, "w") as json_file:
     json_file.write(model_json)
@@ -100,7 +86,7 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
 accuracy_path = "{}/accuracy.png".format(path)
-acc_fig.savefig(accuracy_path,  dpi=acc_fig.dpi)
+acc_fig.savefig(accuracy_path, dpi=acc_fig.dpi)
 
 # summarize history for loss
 lss_fig = plt.figure()
