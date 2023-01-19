@@ -13,7 +13,7 @@ def create_model():
     m.add(keras.layers.Dense(39, input_shape=(39,), activation='relu'))
     m.add(keras.layers.Dense(20, activation='relu'))
     # m.add(keras.layers.Dense(10, activation='relu'))
-    m.add(keras.layers.Dense(1, activation='softmax'))
+    m.add(keras.layers.Dense(1, activation='sigmoid'))
     # Compile model
     m.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     return m

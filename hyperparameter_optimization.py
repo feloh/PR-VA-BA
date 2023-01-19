@@ -8,7 +8,7 @@ INPUT_PATH = 'data/Output.csv'
 SEED = 7
 BATCH_SIZE = [1, 5, 10, 20, 40, 60, 80, 100, 1000]
 EPOCHS = [1000, 5000, 10000]
-VERBOSE = 0
+VERBOSE = 2
 N_JOBS = -1
 CV = 3
 
