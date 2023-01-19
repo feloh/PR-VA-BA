@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.pipeline import Pipeline
+import numpy
 
 
 # Loading Function, Spliting the Data into Test and Train Data, Using SMOTE and RandomUndersampler to balance the Data
@@ -15,9 +16,11 @@ from imblearn.pipeline import Pipeline
 def load_data(path):
     print('Path: ', path)
     ds = np.loadtxt('data/Output.csv', delimiter=',')
+    seed = 7
+    numpy.random.seed(seed)
     input = ds[:, 0:39]
     output = ds[:, 39]
-    x_train, x_test, y_train, y_test = train_test_split(input, output, test_size=0.2)
+    x_train, x_test, y_train, y_test = train_test_split(input, output, test_size=0.2, random_state=seed)
 
     # define pipeline
     over = SMOTE(sampling_strategy=0.1)
@@ -67,19 +70,18 @@ model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']
 print('Fitting the Model')
 hist = fit_model(model, x_train, y_train, EPOCHS, BATCH_SIZE, VERBOSE, x_test, y_test)
 
-# -- serialize model to JSON --
-model_json = model.to_json()
+# -- save Model to Tensorflow SavedModel-Format --
 path = OUTPUT_PATH + '/' + DATE
 print(path)
-os.mkdir(path)
+model_path = "{}/model".format(path)
+model.save(model_path)
 
+# -- serialize model to JSON --
+model_json = model.to_json()
 model_json_path = "{}/{}_{}_model.json".format(path, EPOCHS, BATCH_SIZE)
 with open(model_json_path, "w") as json_file:
     json_file.write(model_json)
 
-# -- serialize weights to HDF5 --
-model_h5_path = "{}/model_weights.h5".format(path)
-model.save_weights(model_h5_path)
 print("Saved model to disk")
 
 # list all history params
@@ -110,9 +112,7 @@ plt.show()
 loss_path = "{}/loss.png".format(path)
 plt.savefig(loss_path)
 
-# TODO Fix Plots
-# TODO Loading Keras Model
-# TODO Split Functions among the Scripts (only as much as possible)
+# TODO Fix saving Plots
 # TODO ReadMe
-# TODO Prediction: Use Model to Predict, to augment Gaze Hits and writing into Excel
+# TODO Split Functions among the Scripts (only as much as possible)
 # TODO Emotionen in späteren Layern erst hinzufügen
