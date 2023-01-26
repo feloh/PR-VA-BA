@@ -6,9 +6,11 @@ import analytics
 
 EPOCHS = 10000
 BATCH_SIZE = 80
+INIT_MODE = 'lecun_uniform'
+NEURONS_1 = 39
+NEURONS_2 = 20
 SEED = 3
 VERBOSE = 2
-INIT_MODE = 'lecun_uniform'
 INPUT_PATH = 'data/Output.csv'
 OUTPUT_PATH = 'models'
 DATE = datetime.datetime.now().strftime('%y%m%d%H%M%S')
@@ -18,7 +20,7 @@ path = OUTPUT_PATH + '/' + DATE
 x_train, x_test, y_train, y_test = process_data.load_data(INPUT_PATH, SEED, False)
 
 # -- Defining and compiling the keras Model --
-MODEL = model.create_model(INIT_MODE)
+MODEL = model.create_model(INIT_MODE, NEURONS_1, NEURONS_2)
 
 # # --Fitting the Model on the Dataset and evaluate on Tensorboard--
 log_path = "./logs/{}".format(DATE)

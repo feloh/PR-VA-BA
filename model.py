@@ -8,11 +8,15 @@ from pyspin.spin import make_spin, Default
 
 # Function for creating and compiling the model, required for KerasClassifier
 @make_spin(Default, "Creating the Model...")
-def create_model(init_mode, dropout_rate):
+def create_model(init_mode, neurons_1, neurons_2):
     m = keras.Sequential()
-    m.add(keras.layers.Dense(39, input_shape=(39,), kernel_initializer=init_mode, activation='relu'))
-    m.add(keras.layers.Dense(20, activation='relu'))
-    m.add(keras.layers.Dropout(dropout_rate))
+    m.add(keras.layers.Dense(neurons_1,
+                             input_shape=(39,),
+                             kernel_initializer=init_mode,
+                             activation='relu',
+                             ))
+
+    m.add(keras.layers.Dense(neurons_2, activation='relu'))
     # m.add(keras.layers.Dense(10, activation='relu'))
     m.add(keras.layers.Dense(1, activation='sigmoid'))
     # Compile model

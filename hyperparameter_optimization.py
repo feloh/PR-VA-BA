@@ -10,10 +10,10 @@ from tensorboard.plugins.hparams import api as hp
 INPUT_PATH = 'data/Output.csv'
 SEED = 3
 BATCH_SIZE = [80, 100]
-EPOCHS = [5000]
+EPOCHS = [500]
+NEURONS_1 = [10, 20, 30, 39, 40, 41, 45, 50]
+NEURONS_2 = [10, 15, 20, 25, 30, 35, 39, 40, 41, 45, 50]
 INIT_MODE = ['lecun_uniform']
-WEIGHT_CONSTRAINT = [1.0, 2.0, 3.0, 4.0, 5.0]
-DROPOUT_RATE = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 VERBOSE = 2
 N_JOBS = -1
 CV = 3
@@ -42,8 +42,6 @@ param_grid = dict(
                 batch_size=BATCH_SIZE,
                 epochs=EPOCHS,
                 model__init_mode=INIT_MODE,
-                model__dropout_rate=DROPOUT_RATE,
-                model__weight_constraint=WEIGHT_CONSTRAINT
                 )
 
 grid = GridSearchCV(
