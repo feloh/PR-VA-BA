@@ -17,7 +17,6 @@ def create_model(init_mode, neurons_1, neurons_2):
                              ))
 
     m.add(keras.layers.Dense(neurons_2, activation='relu'))
-    # m.add(keras.layers.Dense(10, activation='relu'))
     m.add(keras.layers.Dense(1, activation='sigmoid'))
     # Compile model
     m.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])

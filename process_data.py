@@ -8,7 +8,7 @@ from pyspin.spin import make_spin, Default
 
 # Loading Function, Spliting the Data into Test and Train Data, Using SMOTE and RandomUndersampler to balance the Data
 @make_spin(Default, "Loading the Dataset...")
-def load_data(path, s, test_split):
+def load_data(path, s, test_split, smote, under_sampler):
     print('Path: ', path)
     ds = np.loadtxt('data/Output.csv', delimiter=',')
     if test_split:
@@ -21,8 +21,8 @@ def load_data(path, s, test_split):
     x_train, x_test, y_train, y_test = train_test_split(input, output, test_size=0.2, random_state=seed)
 
     # define pipeline
-    over = SMOTE(sampling_strategy=0.2)
-    under = RandomUnderSampler(sampling_strategy=0.5)
+    over = SMOTE(sampling_strategy=smote)
+    under = RandomUnderSampler(sampling_strategy=under_sampler)
     steps = [('o', over), ('u', under)]
     pipeline = Pipeline(steps=steps)
 

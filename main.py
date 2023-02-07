@@ -7,8 +7,10 @@ import analytics
 EPOCHS = 10000
 BATCH_SIZE = 80
 INIT_MODE = 'lecun_uniform'
-NEURONS_1 = 39
-NEURONS_2 = 20
+NEURONS_1 = 30
+NEURONS_2 = 50
+SMOTE = 0.2
+UNDER_SAMPLER = 0.2
 SEED = 3
 VERBOSE = 2
 INPUT_PATH = 'data/Output.csv'
@@ -17,7 +19,7 @@ DATE = datetime.datetime.now().strftime('%y%m%d%H%M%S')
 path = OUTPUT_PATH + '/' + DATE
 
 # -- Loading the Data --
-x_train, x_test, y_train, y_test = process_data.load_data(INPUT_PATH, SEED, False)
+x_train, x_test, y_train, y_test = process_data.load_data(INPUT_PATH, SEED, False, SMOTE, UNDER_SAMPLER)
 
 # -- Defining and compiling the keras Model --
 MODEL = model.create_model(INIT_MODE, NEURONS_1, NEURONS_2)
@@ -29,7 +31,7 @@ tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_path, histogra
 print('Fitting the Model')
 hist = model.fit_model(MODEL, x_train, y_train, EPOCHS, BATCH_SIZE, VERBOSE, x_test, y_test, tensorboard_callback)
 
-analytics.save_model(MODEL, path, EPOCHS, BATCH_SIZE)
+analytics.save_model(MODEL, path, EPOCHS, BATCH_SIZE, hist)
 
 # TODO ReadMe
 # TODO Emotionen in späteren Layern erst hinzufügen
