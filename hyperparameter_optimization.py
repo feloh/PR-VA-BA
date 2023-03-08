@@ -10,15 +10,20 @@ from itertools import permutations
 # from tensorboard.plugins.hparams import api as hp
 
 INPUT_PATH = 'data/Output.csv'
+INPUT_SHAPE = 55
 SEED = 3
-BATCH_SIZE = [80]
-EPOCHS = [500]
-NEURONS_1 = [30]
-NEURONS_2 = [50]
-SMOTE = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-UNDER_SAMPLER = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+BATCH_SIZE = [5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+EPOCHS = [10, 50, 100, 200, 300, 400, 500]
+NEURONS_1 = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+NEURONS_2 = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+NEURONS_3 = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+NEURONS_4 = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+NEURONS_5 = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+NEURONS_6 = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+SMOTE = [0.1, 0.2, 0.3]
+UNDER_SAMPLER = [0.1, 0.2, 0.3]
 RESAMPLING = []
-INIT_MODE = ['lecun_uniform']
+INIT_MODE = ['uniform', 'lecun_uniform', 'normal', 'zero', 'glorot_normal', 'glorot_uniform', 'he_normal', 'he_uniform']
 VERBOSE = 2
 N_JOBS = -1
 CV = 3
@@ -66,6 +71,10 @@ for comb in RESAMPLING:
         model__init_mode=INIT_MODE,
         model__neurons_1=NEURONS_1,
         model__neurons_2=NEURONS_2,
+        model__neurons_3=NEURONS_3,
+        model__neurons_4=NEURONS_4,
+        model__neurons_5=NEURONS_5,
+        model__neurons_6=NEURONS_6,
     )
 
     grid = GridSearchCV(

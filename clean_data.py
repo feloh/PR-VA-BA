@@ -79,41 +79,32 @@ data_sheet_name = 'Data'
 Data_to_Smooth = [
     dict(name='HR', operation='gradient', timeStampLimit=120, r=True),
     dict(name='EMGDelta', operation='gradient', timeStampLimit=60, r=False),
-    dict(name='PitchZones', operation='splitGap', timeStampLimit=30, r=True),
+    dict(name='Zone1', operation='splitGap', timeStampLimit=30, r=True),
+    dict(name='Zone2', operation='splitGap', timeStampLimit=30, r=True),
+    dict(name='Zone3', operation='splitGap', timeStampLimit=30, r=True),
+    dict(name='Zone4', operation='splitGap', timeStampLimit=30, r=True),
+    dict(name='Zone5', operation='splitGap', timeStampLimit=30, r=True),
+    dict(name='Zone6', operation='splitGap', timeStampLimit=30, r=True),
     dict(name='ObjectsOnScreen', operation='splitGap', timeStampLimit=30, r=True),
-    dict(name='BallPosession', operation='splitGap', timeStampLimit=30, r=True),
+    dict(name='BallPosessionHome', operation='splitGap', timeStampLimit=30, r=True),
+    dict(name='BallPosessionAway', operation='splitGap', timeStampLimit=30, r=True),
     dict(name='OddsDiffSquare', operation='gradient', timeStampLimit=300, r=True)
 ]
-not_combined_columns = [
-    'BallPosessionAway',
-    'BallPosessionHome',
-    'CornerKickAway',
-    'CornerKickHome',
-    'FoulAway',
-    'FoulHome',
-    'FreeKickAway',
-    'FreeKickHome',
-    'GoalDiff1',
-    'GoalDiff2',
-    'GoalDiff3',
-    'GoalKeeperKickAway',
-    'GoalKeeperKickHome',
-    'GoalShootAway',
-    'GoalShootHome',
-    'KickOffAway',
-    'KickOffHome',
-    'PossenChangeHometoAway',
-    'PossesionChangeAwaytoHome',
-    'ThrowInAway',
-    'ThrowInHome',
-    'YellowOrRedCardAway',
-    'YellowOrRedCardHome',
-    'Zone1',
-    'Zone2',
-    'Zone3',
-    'Zone4',
-    'Zone5',
-    'Zone6',
+combined_columns = [
+    'BallPosession',
+    'KickOff',
+    'GoalKeepKick',
+    'CornerKick',
+    'FreeKick',
+    'ThrowIn',
+    'Foul',
+    'Injury',
+    'YellowORRedCard',
+    'Goal',
+    'GoalShoot',
+    'PossenChangeHomeAway',
+    'PitchZones',
+    'GoalDiff1bis3'
 ]
 export_path = 'data/Output.xlsx'
 export_path_csv = 'data/Output.csv'
@@ -124,14 +115,15 @@ print('The Data has been successfully imported.')
 print(df.info())
 
 # -- Clean the Dataset --
+
 # Remove the BallSpeed Column
 df = df.drop(columns='BallSpeed')
 print('-- Dropped BallSpeed --')
 
-# Remove not combined Columns
-df = df.drop(columns=not_combined_columns)
+# Remove  combined Columns
+df = df.drop(columns=combined_columns)
 print('-- Dropped not combined Columns --')
-del not_combined_columns
+del combined_columns
 gc.collect()
 
 # Smooth Missing Data

@@ -8,15 +8,19 @@ from pyspin.spin import make_spin, Default
 
 # Function for creating and compiling the model, required for KerasClassifier
 @make_spin(Default, "Creating the Model...")
-def create_model(init_mode, neurons_1, neurons_2):
+def create_model(init_mode, input_shape, neurons_1, neurons_2, neurons_3, neurons_4, neurons_5, neurons_6):
     m = keras.Sequential()
     m.add(keras.layers.Dense(neurons_1,
-                             input_shape=(39,),
+                             input_shape=(input_shape,),
                              kernel_initializer=init_mode,
                              activation='relu',
                              ))
 
     m.add(keras.layers.Dense(neurons_2, activation='relu'))
+    m.add(keras.layers.Dense(neurons_3, activation='relu'))
+    m.add(keras.layers.Dense(neurons_4, activation='relu'))
+    m.add(keras.layers.Dense(neurons_5, activation='relu'))
+    m.add(keras.layers.Dense(neurons_6, activation='relu'))
     m.add(keras.layers.Dense(1, activation='sigmoid'))
     # Compile model
     m.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
